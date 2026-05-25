@@ -1,12 +1,55 @@
 from llm_service.llm_abc import LLMABC
-from llm_service.models import LLMConfig
+from llm_service.models import LLMConfig, BaseContext, AgentResponse
 from langchain.agents import create_agent
+from langchain.messages import SystemMessage, HumanMessage, AIMessage
+from langchain.agents.middleware import AgentMiddleware
+from langchain_core.runnables import Runnable
+from langchain.agents.structured_output import ProviderStrategy
 from langchain_openrouter import ChatOpenRouter
 from typing import AsyncGenerator
+from langchain.tools import BaseTool, tool
 
 class OpenRouterLLM(LLMABC):
     def __init__(self, llm_config: LLMConfig):
         self.model = ChatOpenRouter(name=llm_config.model_name, api_key=llm_config.api_key)
     
-    async def generate_response(self, prompt: str) -> AsyncGenerator[str, None]:
-        pass
+    def __create_agent(self, 
+                       name: str, 
+                       model: ChatOpenRouter, 
+                       system_prompt: SystemMessage, 
+                       tools: list[BaseTool], context: 
+                       BaseContext, middlewares: list[AgentMiddleware], 
+                       checkpointer_id: str | None) -> Runnable:
+        return create_agent(
+            name=name,
+            llm=model,
+            system_message=system_prompt,
+            tools=tools,
+            verbose=True,
+            middlewares=middlewares,
+            checkpointer_id=checkpointer_id,
+            context_schema=BaseContext,
+            context=context,
+            checkpointer_id=checkpointer_id,
+        )
+
+    async def generate_response(self, 
+                                query: str, 
+                                name='', 
+                                context: BaseContext | None = None, 
+                                tools: list[BaseTool] = [], 
+                                system_prompt: SystemMessage = SystemMessage(content="You are a helpful assistant.")) -> str:
+        agent = self.__create_agent(name, self.model, system_prompt, tools, context, [], None)
+        result = await agent.ainvoke({'messages': [HumanMessage(content=query)]}, config={}, version='v2')
+        return result.content
+    
+    async def generate_streaming_response(self, 
+                                query: str, 
+                                name='', 
+                                context: BaseContext | None = None, 
+                                tools: list[BaseTool] = [], 
+                                system_prompt: SystemMessage = SystemMessage(content="You are a helpful assistant.")) -> AsyncGenerator[str, None]:
+        agent = self.__create_agent(name, self.model, system_prompt, tools, context, [], None)
+        async for message in agent.astream({'messages': [HumanMessage(content=query)]}, config={}, stream_mode='messages', version='v2'):
+            if isinstance(message, AIMessage):
+                yield message.content
