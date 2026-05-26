@@ -8,6 +8,7 @@ from langchain.agents.structured_output import ProviderStrategy
 from langchain_openrouter import ChatOpenRouter
 from typing import AsyncGenerator
 from langchain.tools import BaseTool
+from langgraph.checkpoint.memory import InMemorySaver
 
 class OpenRouterLLM(LLMABC):
     def __init__(self, llm_config: LLMConfig):
@@ -32,7 +33,8 @@ class OpenRouterLLM(LLMABC):
             context_schema=BaseContext,
             context=context,
             checkpointer_id=checkpointer_id,
-            provider_strategy=provider_strategy
+            provider_strategy=provider_strategy,
+            checkpointer = InMemorySaver() if checkpointer_id else None
         )
 
     async def generate_response(self, 

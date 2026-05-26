@@ -9,9 +9,7 @@ import os
 
 class LLMService:
     def __init__(self, llm: LLMABC):
-        model_name = os.getenv('LLM_MODEL_NAME', 'gpt-4o')
-        api_key = os.getenv('LLM_API_KEY', '')
-        self.llm = llm or OpenRouterLLM(LLMConfig(model_name=model_name, api_key=api_key))
+        self.llm = llm or OpenRouterLLM(LLMConfig(model_name=os.getenv('OPENROUTER_MODEL_NAME'), api_key=os.getenv('OPENROUTER_API_KEY')))
     
     async def generate_response(self, prompt: str, data: dict) -> str:
         context = BaseContext()
