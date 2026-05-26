@@ -4,4 +4,3 @@ from langchain.tools import tool
 async def search_tool(query: str) -> str:
     '''This tool performs a search on google based on the provided query and returns the search results.'''
     return f"Search results for: {query}"
-
