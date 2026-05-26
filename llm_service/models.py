@@ -1,3 +1,6 @@
+from langchain.messages import SystemMessage
+from langchain.agents import  AgentMiddleware
+from langchain.agents.structured_output import ProviderStrategy
 from pydantic import BaseModel, SecretStr
 from langchain.tools import BaseTool, tool
 
@@ -17,3 +20,11 @@ class AgentResponse(BaseModel):
 
 class BaseContext(BaseModel):
     pass
+
+class BaseMetadata(BaseModel):
+    tools: list[BaseTool] = []
+    middlewares: list[AgentMiddleware] = []
+    provider_strategy: ProviderStrategy | None = None
+    checkpointer_id: str | None = None
+    context: BaseContext | None = None
+    system_prompt: SystemMessage | None = None

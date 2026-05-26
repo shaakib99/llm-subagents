@@ -1,5 +1,5 @@
 from langchain.tools import BaseTool, tool
-from agents.research_agent import research_agent
+from agents import research_agent
 from llm_service.models import Agent
 
 agents_list: list[Agent] = [
