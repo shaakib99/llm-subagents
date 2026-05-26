@@ -12,7 +12,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 
 class OpenRouterLLM(LLMABC):
     def __init__(self, llm_config: LLMConfig):
-        self.model = ChatOpenRouter(name=llm_config.model_name, api_key=llm_config.api_key)
+        self.model = ChatOpenRouter(model=llm_config.model_name, api_key=llm_config.api_key)
     
     def __create_agent(self, 
                        name: str, 
@@ -29,7 +29,6 @@ class OpenRouterLLM(LLMABC):
             tools=tools,
             verbose=True,
             middlewares=middlewares,
-            checkpointer_id=checkpointer_id,
             context_schema=BaseContext,
             context=context,
             checkpointer_id=checkpointer_id,
