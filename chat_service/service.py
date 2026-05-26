@@ -1,7 +1,7 @@
 from llm_service.models import BaseContext
 from llm_service.service import LLMService
 from llm_service.models import BaseMetadata
-from agents.agent_util import get_agent, list_agents
+from agents.agent_util import list_agents, call_sub_agent
 
 class ChatService:
     def __init__(self, llm_service = None):
@@ -10,10 +10,10 @@ class ChatService:
     async def get_response(self, query:str, metadata: BaseMetadata) -> str:
         metadata = BaseMetadata()
         metadata.context = BaseContext()
-        metadata.tools = [get_agent, list_agents]
+        metadata.tools = [list_agents, call_sub_agent]
         metadata.middlewares = []
         metadata.provider_strategy = None
         metadata.checkpointer_id = None
-        metadata.system_prompt = None
+        metadata.system_prompt = 'You are a helpful assistant that can call various agents to assist with user queries. Use the tools provided to call the appropriate agent based on the user query. Always provide a helpful and concise response to the user query after calling the necessary agents.'
         response = await self.llm.generate_response(query, metadata)
         return response

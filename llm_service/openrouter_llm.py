@@ -24,15 +24,11 @@ class OpenRouterLLM(LLMABC):
                        system_prompt: SystemMessage) -> Runnable:
         return create_agent(
             name=name,
-            llm=model,
-            system_message=system_prompt,
+            model=model,
+            system_prompt=system_prompt,
             tools=tools,
-            verbose=True,
-            middlewares=middlewares,
+            middleware=middlewares,
             context_schema=BaseContext,
-            context=context,
-            checkpointer_id=checkpointer_id,
-            provider_strategy=provider_strategy,
             checkpointer = InMemorySaver() if checkpointer_id else None
         )
 
@@ -49,7 +45,7 @@ class OpenRouterLLM(LLMABC):
         agent = self.__create_agent(name, self.model, tools, context, middlewares, provider_strategy, checkpointer_id, system_prompt)
         
         result = await agent.ainvoke({'messages': [HumanMessage(content=query)]}, config={}, version='v2')
-        return result.content
+        return result
     
     async def generate_streaming_response(self, 
                                 query: str, 

@@ -12,12 +12,12 @@ class LLMService:
         self.llm = llm or OpenRouterLLM(LLMConfig(model_name=os.getenv('OPENROUTER_MODEL_NAME', 'gpt-3.5-turbo'), api_key=os.getenv('OPENROUTER_API_KEY', 'test')))
     
     async def generate_response(self, prompt: str, data: BaseMetadata) -> str:
-        context = data.get('context', BaseContext())
-        tools = data.get('tools', [])
-        middlewares = data.get('middlewares', [])
-        provider_strategy = data.get('provider_strategy', None)
-        checkpointer_id = data.get('checkpointer_id', None)
-        system_prompt = data.get('system_prompt', None)
+        context = data.context or BaseContext()
+        tools = data.tools or []
+        middlewares = data.middlewares or []
+        provider_strategy = data.provider_strategy
+        checkpointer_id = data.checkpointer_id
+        system_prompt = data.system_prompt
 
         return await self.llm.generate_response(prompt, context=context, tools=tools, middlewares=middlewares, provider_strategy=provider_strategy, checkpointer_id=checkpointer_id, system_prompt=system_prompt)
     

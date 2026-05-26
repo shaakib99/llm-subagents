@@ -6,11 +6,17 @@ from llm_service.service import LLMService
 
 @tool('research_agent', description='A research agent that can perform research tasks and return summaries.')
 async def research_agent(query: str) -> AgentResponse:
-    '''This agent performs research based on the provided query and returns a summary of the findings.'''
+    '''
+    Args: query (str): The research query provided by the user.
+
+    This agent performs research based on the user's query using various tools and returns a summary of the findings. It can utilize tools like web search and website visiting to gather information and provide a comprehensive response.
+    '''
+
+    print(f"Research Agent received query: {query}")
     prompt = f"Do research for this user's query: {query}"
     llm_service = LLMService()
     data = BaseMetadata()
     data.tools = [visit_website_tool, search_tool]
     data.middlewares = []
     result = await llm_service.generate_response(prompt=prompt, data=data)
-    return AgentResponse(result=result)
+    return result
