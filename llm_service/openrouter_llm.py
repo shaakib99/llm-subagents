@@ -7,7 +7,7 @@ from langchain_core.runnables import Runnable
 from langchain.agents.structured_output import ProviderStrategy
 from langchain_openrouter import ChatOpenRouter
 from typing import AsyncGenerator
-from langchain.tools import BaseTool, tool
+from langchain.tools import BaseTool
 
 class OpenRouterLLM(LLMABC):
     def __init__(self, llm_config: LLMConfig):
@@ -16,10 +16,11 @@ class OpenRouterLLM(LLMABC):
     def __create_agent(self, 
                        name: str, 
                        model: ChatOpenRouter, 
-                       system_prompt: SystemMessage, 
                        tools: list[BaseTool], context: 
-                       BaseContext, middlewares: list[AgentMiddleware], 
-                       checkpointer_id: str | None) -> Runnable:
+                       BaseContext, middlewares: list[AgentMiddleware],
+                       provider_strategy: ProviderStrategy,
+                       checkpointer_id: str | None,
+                       system_prompt: SystemMessage) -> Runnable:
         return create_agent(
             name=name,
             llm=model,
@@ -31,6 +32,7 @@ class OpenRouterLLM(LLMABC):
             context_schema=BaseContext,
             context=context,
             checkpointer_id=checkpointer_id,
+            provider_strategy=provider_strategy
         )
 
     async def generate_response(self, 
@@ -38,8 +40,13 @@ class OpenRouterLLM(LLMABC):
                                 name='', 
                                 context: BaseContext | None = None, 
                                 tools: list[BaseTool] = [], 
+                                middlewares: list[AgentMiddleware] = [],
+                                provider_strategy: ProviderStrategy = ProviderStrategy(AgentResponse),
+                                checkpointer_id: str | None = None,
                                 system_prompt: SystemMessage = SystemMessage(content="You are a helpful assistant.")) -> str:
-        agent = self.__create_agent(name, self.model, system_prompt, tools, context, [], None)
+        
+        agent = self.__create_agent(name, self.model, tools, context, middlewares, provider_strategy, checkpointer_id, system_prompt)
+        
         result = await agent.ainvoke({'messages': [HumanMessage(content=query)]}, config={}, version='v2')
         return result.content
     
@@ -48,8 +55,13 @@ class OpenRouterLLM(LLMABC):
                                 name='', 
                                 context: BaseContext | None = None, 
                                 tools: list[BaseTool] = [], 
+                                middlewares: list[AgentMiddleware] = [],
+                                provider_strategy: ProviderStrategy = ProviderStrategy(AgentResponse),
+                                checkpointer_id: str | None = None,
                                 system_prompt: SystemMessage = SystemMessage(content="You are a helpful assistant.")) -> AsyncGenerator[str, None]:
-        agent = self.__create_agent(name, self.model, system_prompt, tools, context, [], None)
+        
+        agent = self.__create_agent(name, self.model, tools, context, middlewares, provider_strategy, checkpointer_id, system_prompt)
+        
         async for message in agent.astream({'messages': [HumanMessage(content=query)]}, config={}, stream_mode='messages', version='v2'):
             if isinstance(message, AIMessage):
                 yield message.content
