@@ -19,7 +19,6 @@ class LLMService:
         checkpointer_id = data.get('checkpointer_id', None)
         system_prompt = data.get('system_prompt', None)
 
-        tools.extend([get_agent, list_agents])
         return await self.llm.generate_response(prompt, context=context, tools=tools, middlewares=middlewares, provider_strategy=provider_strategy, checkpointer_id=checkpointer_id, system_prompt=system_prompt)
     
     async def generate_streaming_response(self, prompt: str, data: dict) -> AsyncGenerator[str, None]:
