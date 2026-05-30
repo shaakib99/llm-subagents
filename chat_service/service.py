@@ -14,6 +14,6 @@ class ChatService:
         metadata.middlewares = []
         metadata.provider_strategy = None
         metadata.checkpointer_id = None
-        metadata.system_prompt = 'You are a helpful assistant that can call various agents to assist with user queries. Use the tools provided to call the appropriate agent based on the user query. Always provide a helpful and concise response to the user query after calling the necessary agents.'
+        metadata.system_prompt = 'You are a helpful assistant that can call various agents to assist with user queries. Use the tools provided to call the appropriate agent based on the user query. Always provide a helpful and concise response to the user query after calling the necessary agents. You must ONLY use the provided tools. Do not invent new tools or parameters. If a subagent is not available in the tool definitions, handle the task internally.'
         response = await self.llm.generate_response(query, metadata)
         return response

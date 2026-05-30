@@ -1,7 +1,7 @@
 from langchain.messages import SystemMessage
 from langchain.agents.middleware import AgentMiddleware
 from langchain.agents.structured_output import ProviderStrategy
-from pydantic import BaseModel, SecretStr
+from pydantic import BaseModel, SecretStr, Field
 from langchain.tools import BaseTool, tool
 
 
@@ -30,3 +30,7 @@ class BaseMetadata(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+
+class SubAgentCallSchema(BaseModel):
+    agent_name: str = Field(description="The name of the agent to call")
+    arguments: dict = Field(description="The dictionary of arguments to pass to the agent")
